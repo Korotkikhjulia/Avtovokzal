@@ -13,6 +13,8 @@ use App\Models\route;
 use App\Models\trip;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Symfony\Component\Console\Input\Input;
 
 
 
@@ -105,7 +107,7 @@ class MainController extends Controller
     public function store(Request $request)
     {
         $fields = $request->validate([
-            'number_route' => 'required|unique:users|max:10',
+            'number_route' => 'required|unique:routes|max:10',
             'start_stop' => 'required',
             'end_stop' => 'required',
             'price' => 'required|numeric',
@@ -248,21 +250,25 @@ class MainController extends Controller
 
     public function password(Request $request)
     {
-
         $fields = $request->validate([
             'email' => 'required|email',
             'old_password' => 'required',
             'password' => 'required',
         ]);
-        
-        $us = User::where('email', $request->email)->get();
-        user::where('email', $request->email)->update([
-            'password' => $fields['password'],
-        ]);
 
-        $response = [
-            'status' => true
-        ];
+        $us = User::where('email', $request->email)->first();
+        if ((User::where('email', $fields['email'])->first()) && ($us && Hash::check($fields['old_password'], $us->password))) {
+            user::where('email', $request->email)->update([
+                'password' => $fields['password'],
+            ]);
+            $response = [
+                'status' => true
+            ];
+        } else {
+            $response = [
+                'status' => false
+            ];
+        }
         return response($response, 200);
     }
 
