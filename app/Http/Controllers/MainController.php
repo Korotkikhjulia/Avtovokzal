@@ -13,8 +13,6 @@ use App\Models\route;
 use App\Models\trip;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use App\Rules\StrMustContain;
 
 
 
@@ -209,15 +207,12 @@ class MainController extends Controller
 
     public function ustore(Request $request)
     {
-        $input = [
-            'status' => new StrMustContain,
-        ];
         $fields = $request->validate([
             'name' => 'required|max:70',
             'email' => 'required|email',
-            'status' => 'required',
+            'status' => 'required|in:user,admin,dispatcher',
             'password' => 'required',
-        ], $input);
+        ]);
         $user = User::create([
             'name' => $fields['name'],
             'email' => $fields['email'],
@@ -234,14 +229,11 @@ class MainController extends Controller
 
     public function uupdate(Request $request)
     {
-        $input = [
-            'status' => new StrMustContain,
-        ];
         $fields = $request->validate([
             'name' => 'required|max:70',
             'email' => 'required|email',
-            'status' => 'required',
-        ], $input);
+            'status' => 'required|in:user,admin,dispatcher',
+        ]);
         user::where('email', $request->email)->update([
             'name' => $fields['name'],
             'email' => $fields['email'],
